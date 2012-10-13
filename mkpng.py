@@ -16,9 +16,9 @@ Options:
 """
 
 from docopt import docopt
+from schema import Schema, And, Or, Use, Optional, SchemaError
 from os import path, extsep
 from sh import optipng, convert
-import sys
 
 def main(args):
     path_input_file, level = args["FILE"], args["--level"]
@@ -32,14 +32,27 @@ def main(args):
         print("Crushing png...")
         optipng("-o" + level, path_tmp_png)
         print("Done!")
-        sys.exit()
-    else:
-        print("That file doesn't exist!")
-        sys.exit()
+        exit(0)
 
 
 if __name__ == '__main__':
     try:
-        main(docopt(__doc__))
+        args = docopt(__doc__)
+        print args, '\n'*2
+
+        schema = Schema({
+            "FILE": Use(open, error="That file doesn't exist!"),
+            "--level": Or(None,
+                          And(Use(int), lambda n: 1 < n < 7),
+                          error="LEVEL should be between 1 and 7"),
+            Optional("--help"): Or(True, False),
+            })
+
+        try:
+            schema.validate(args)
+        except SchemaError as e:
+            exit(e)
+
+        main(args)
     except KeyboardInterrupt:
-        sys.exit()
+        exit(0)
