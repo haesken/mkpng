@@ -38,7 +38,6 @@ def main(args):
 if __name__ == '__main__':
     try:
         args = docopt(__doc__)
-        print args, '\n'*2
 
         schema = Schema({
             "FILE": Use(open, error="That file doesn't exist!"),
