@@ -42,7 +42,7 @@ if __name__ == '__main__':
         schema = Schema({
             "FILE": Use(open, error="That file doesn't exist!"),
             "--level": Or(None,
-                          And(Use(int), lambda n: 1 < n < 7),
+                          And(Use(int), lambda n: 1 <= n <= 7),
                           error="LEVEL should be between 1 and 7"),
             Optional("--help"): Or(True, False),
             })
