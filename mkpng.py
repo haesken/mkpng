@@ -17,7 +17,7 @@ Options:
 
 from docopt import docopt
 from schema import Schema, And, Or, Use, Optional, SchemaError
-from os import path, extsep
+from os import path, remove
 from sh import optipng, convert
 
 def main(args):
@@ -26,12 +26,18 @@ def main(args):
 
     if path.exists(path_input_file):
         if not path.splitext(path_input_file)[-1][1:] == "png":
-            convert(path_input_file, path_tmp_png)
             print("Converting file to png...")
 
+            if path.exists(path_tmp_png):
+                remove(path_tmp_png)
+
+            convert(path_input_file, path_tmp_png)
+
         print("Crushing png...")
+        # Will overwrite path_tmp_png with its output.
         optipng("-o" + level, path_tmp_png)
         print("Done!")
+
         exit(0)
 
 
@@ -40,10 +46,13 @@ if __name__ == '__main__':
         args = docopt(__doc__)
 
         schema = Schema({
-            "FILE": Use(open, error="That file doesn't exist!"),
+            "FILE": Use(open,
+                        error="FILE doesn't exist or isn't readable!"),
+
             "--level": Or(None,
                           And(Use(int), lambda n: 1 <= n <= 7),
                           error="LEVEL should be between 1 and 7"),
+
             Optional("--help"): Or(True, False),
             })
 
