@@ -22,7 +22,12 @@ from sh import optipng, convert
 
 
 def validate_args(args):
-    """ Validate arguments. """
+    """ Validate arguments.
+        Checks:
+            that the specified file exists and is readable
+            that LEVEL is between 1 and 7
+    """
+
     schema = Schema({
         "FILE": Use(open,
                     error="FILE doesn't exist or isn't readable!"),
@@ -52,27 +57,25 @@ def main(args):
     path_tmp_png = path.splitext(path_input_file)[0] + ".png"
     input_file_ext = path.splitext(path_input_file)[-1][1:]
 
-    if path.exists(path_input_file):
-        if not input_file_ext == "png":
-            if input_file_ext in ["bmp", "tiff", "raw"]:
-                print("Converting file to png...")
+    if not input_file_ext == "png":
+        if input_file_ext in ["bmp", "tiff", "raw"]:
+            print("Converting file to png...")
 
-                if path.exists(path_tmp_png):
-                    remove(path_tmp_png)
+            if path.exists(path_tmp_png):
+                remove(path_tmp_png)
 
-                convert(path_input_file, path_tmp_png)
-            else:
-                print("Image is in a lossy format, aborting!")
+            convert(path_input_file, path_tmp_png)
+        else:
+            print("Image is in a lossy format, aborting!")
+            exit(1)
 
-        print("Optimizing png...")
-        # Will overwrite path_tmp_png with its output.
-        optipng("-o" + level, path_tmp_png)
-        print("Done!")
-
-        print("Output file at {out_path}".format(
-            out_path=path.abspath(path_tmp_png)))
-
-        exit(0)
+    print("Optimizing png...")
+    # Will overwrite path_tmp_png with its output.
+    optipng("-o" + level, path_tmp_png)
+    print("Done!")
+    print("Output file at {out_path}".format(
+        out_path=path.abspath(path_tmp_png)))
+    exit(0)
 
 
 if __name__ == '__main__':
